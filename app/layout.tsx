@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ThemeProvider } from '@/components/theme-provider';
 import {
   Geist,
   Geist_Mono,
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn(
         'h-full',
         'antialiased',
@@ -43,7 +45,15 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         notoSans.variable,
         playfairDisplayHeading.variable
       )}>
-      <body className={cn('min-h-full', 'flex', 'flex-col')}>{children}</body>
+      <body className={cn('min-h-full', 'flex', 'flex-col')}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
