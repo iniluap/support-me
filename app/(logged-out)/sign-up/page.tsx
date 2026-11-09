@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { PersonStandingIcon } from 'lucide-react';
 import Link from 'next/link';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
@@ -29,22 +29,54 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
-const formSchema = z.object({
-  email: z.email(),
-  accountType: z.enum(['personal', 'company'])
-  // companyName: z.string().optional(),
-  // employeesNumber: z.coerce.number().optional()
-});
+const formSchema = z
+  .object({
+    email: z.email(),
+    accountType: z.enum(['personal', 'company']),
+    companyName: z.string().optional(),
+    employeesNumber: z.coerce.number().optional()
+  })
+  .superRefine((data, ctx) => {
+    if (data.accountType === 'company' && !data.companyName) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['companyName'],
+        message: 'Company name is required'
+      });
+    }
+
+    if (
+      data.accountType === 'company' &&
+      (!data.employeesNumber || data.employeesNumber < 1)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['employeesNumber'],
+        message: 'Number of employees is required'
+      });
+    }
+  });
 
 export default function SignUpPage() {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<
+    z.input<typeof formSchema>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any,
+    z.output<typeof formSchema>
+  >({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
-      accountType: 'personal'
-      // companyName: '',
-      // employeesNumber: undefined
+      accountType: 'personal',
+      companyName: '',
+      employeesNumber: 0
     }
+  });
+
+  const { register } = useForm();
+  const accountType = useWatch({
+    control: form.control,
+    name: 'accountType'
   });
 
   function handleSubmit(values: z.infer<typeof formSchema>) {
@@ -95,7 +127,9 @@ export default function SignUpPage() {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="account-type">Account type</FieldLabel>
-                    <Select onValueChange={field.onChange}>
+                    <Select
+                      {...register('field')}
+                      onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select an account type" />
                       </SelectTrigger>
@@ -107,8 +141,57 @@ export default function SignUpPage() {
                   </Field>
                 )}
               />
-              {/* Company name field */}
-              {/* No of employees field */}
+              {accountType === 'company' && (
+                <>
+                  {/* Company name field */}
+                  <Controller
+                    name="companyName"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          Company name
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          id={field.name}
+                          aria-invalid={fieldState.invalid}
+                          placeholder="Company name"
+                          autoComplete="on"
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  {/* No of employees field */}
+                  <Controller
+                    name="employeesNumber"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          Number of employees
+                        </FieldLabel>
+                        <Input
+                          {...field}
+                          value={field.value as string | number}
+                          id={field.name}
+                          aria-invalid={fieldState.invalid}
+                          type="number"
+                          min={0}
+                          placeholder="Number of employees"
+                          autoComplete="off"
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </>
+              )}
               {/* Date of birth field */}
               {/* Password field */}
               {/* Confirm password field */}
