@@ -21,16 +21,29 @@ import {
   FieldError
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 const formSchema = z.object({
-  email: z.email()
+  email: z.email(),
+  accountType: z.enum(['personal', 'company'])
+  // companyName: z.string().optional(),
+  // employeesNumber: z.coerce.number().optional()
 });
 
 export default function SignUpPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: ''
+      email: '',
+      accountType: 'personal'
+      // companyName: '',
+      // employeesNumber: undefined
     }
   });
 
@@ -54,6 +67,7 @@ export default function SignUpPage() {
             id="login-form"
             onSubmit={form.handleSubmit(handleSubmit)}>
             <FieldGroup>
+              {/* Email field */}
               <Controller
                 name="email"
                 control={form.control}
@@ -74,6 +88,31 @@ export default function SignUpPage() {
                   </Field>
                 )}
               />
+              {/* Account type field */}
+              <Controller
+                name="accountType"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="account-type">Account type</FieldLabel>
+                    <Select onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an account type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="personal">Personal</SelectItem>
+                        <SelectItem value="company">Company</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+              {/* Company name field */}
+              {/* No of employees field */}
+              {/* Date of birth field */}
+              {/* Password field */}
+              {/* Confirm password field */}
+              {/* Terms & conditions field */}
               <Field orientation="horizontal">
                 <Button type="submit">Sign up</Button>
                 <Button
