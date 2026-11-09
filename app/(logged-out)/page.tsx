@@ -22,7 +22,7 @@ export default function LandingPage() {
         <small>or</small>
         <Button
           nativeButton={false}
-          render={<Link href="/signup" />}
+          render={<Link href="/sign-up" />}
           variant="outline">
           Sign up
         </Button>

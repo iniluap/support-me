@@ -118,7 +118,7 @@ export default function LoginPage() {
             nativeButton={false}
             variant={'outline'}
             size={'sm'}
-            render={<Link href="/signup" />}>
+            render={<Link href="/sign-up" />}>
             Sign up
           </Button>
         </CardFooter>
