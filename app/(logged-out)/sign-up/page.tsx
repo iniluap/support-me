@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { PersonStandingIcon } from 'lucide-react';
+import { CalendarIcon, PersonStandingIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useForm, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,13 +28,29 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import React from 'react';
 
 const formSchema = z
   .object({
     email: z.email(),
     accountType: z.enum(['personal', 'company']),
     companyName: z.string().optional(),
-    employeesNumber: z.coerce.number().optional()
+    employeesNumber: z.coerce.number().optional(),
+    dob: z.date().refine((date) => {
+      const today = new Date();
+      const eighteenYearsAgo = new Date(
+        today.getFullYear() - 18,
+        today.getMonth(),
+        today.getDate()
+      );
+      return date <= eighteenYearsAgo;
+    }, 'You must be at least 18 years old')
   })
   .superRefine((data, ctx) => {
     if (data.accountType === 'company' && !data.companyName) {
@@ -58,6 +74,9 @@ const formSchema = z
   });
 
 export default function SignUpPage() {
+  const [open, setOpen] = React.useState(false);
+  const [date, setDate] = React.useState<Date | undefined>(undefined);
+
   const form = useForm<
     z.input<typeof formSchema>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,7 +88,8 @@ export default function SignUpPage() {
       email: '',
       accountType: 'personal',
       companyName: '',
-      employeesNumber: 0
+      employeesNumber: 0,
+      dob: undefined
     }
   });
 
@@ -192,7 +212,65 @@ export default function SignUpPage() {
                   />
                 </>
               )}
-              {/* Date of birth field */}
+              {accountType === 'personal' && (
+                <>
+                  {/* Date of birth field */}
+                  <Controller
+                    name="dob"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          Date of birth
+                        </FieldLabel>
+                        <Popover
+                          open={open}
+                          onOpenChange={setOpen}>
+                          <PopoverTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                id="date"
+                                className="px-0 border-transparent border-b-input justify-between font-normal normal-case tracking-normal text-sm">
+                                {date ? (
+                                  date.toLocaleDateString()
+                                ) : (
+                                  <span
+                                    data-placeholder
+                                    className="data-placeholder:text-muted-foreground">
+                                    Select date
+                                  </span>
+                                )}
+                                <CalendarIcon />
+                              </Button>
+                            }
+                          />
+                          <PopoverContent
+                            className="w-auto overflow-hidden p-0"
+                            align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              defaultMonth={field.value}
+                              captionLayout="dropdown"
+                              fixedWeeks
+                              weekStartsOn={1}
+                              disabled={{ after: new Date() }}
+                              onSelect={(date) => {
+                                setDate(date);
+                                setOpen(false);
+                              }}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </>
+              )}
               {/* Password field */}
               {/* Confirm password field */}
               {/* Terms & conditions field */}
