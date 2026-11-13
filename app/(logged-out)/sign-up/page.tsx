@@ -50,7 +50,9 @@ const formSchema = z
         today.getDate()
       );
       return date <= eighteenYearsAgo;
-    }, 'You must be at least 18 years old')
+    }, 'You must be at least 18 years old'),
+    password: z.string().min(8, 'Password has to have minimum 8 characters'),
+    confirmPassword: z.string()
   })
   .superRefine((data, ctx) => {
     if (data.accountType === 'company' && !data.companyName) {
@@ -71,6 +73,14 @@ const formSchema = z
         message: 'Number of employees is required'
       });
     }
+
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Passwords do not match',
+        path: ['confirmPassword']
+      });
+    }
   });
 
 export default function SignUpPage() {
@@ -89,7 +99,9 @@ export default function SignUpPage() {
       accountType: 'personal',
       companyName: '',
       employeesNumber: 0,
-      dob: undefined
+      dob: undefined,
+      password: '',
+      confirmPassword: ''
     }
   });
 
@@ -273,7 +285,47 @@ export default function SignUpPage() {
                 </>
               )}
               {/* Password field */}
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      aria-invalid={fieldState.invalid}
+                      autoComplete="off"
+                      placeholder="abcd1234"
+                      type="password"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               {/* Confirm password field */}
+              <Controller
+                name="confirmPassword"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      aria-invalid={fieldState.invalid}
+                      autoComplete="off"
+                      placeholder="abcd1234"
+                      type="password"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               {/* Terms & conditions field */}
               <Field orientation="horizontal">
                 <Button type="submit">Sign up</Button>
