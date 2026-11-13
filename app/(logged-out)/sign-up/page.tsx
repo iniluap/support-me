@@ -369,7 +369,7 @@ export default function SignUpPage() {
                 )}
               />
               {/* Submit */}
-              <Field orientation="horizontal">
+              <Field>
                 <Button type="submit">Sign up</Button>
                 <Button
                   nativeButton={false}
