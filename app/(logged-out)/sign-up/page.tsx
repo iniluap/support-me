@@ -42,15 +42,17 @@ const formSchema = z
     accountType: z.enum(['personal', 'company']),
     companyName: z.string().optional(),
     employeesNumber: z.coerce.number().optional(),
-    dob: z.date().refine((date) => {
-      const today = new Date();
-      const eighteenYearsAgo = new Date(
-        today.getFullYear() - 18,
-        today.getMonth(),
-        today.getDate()
-      );
-      return date <= eighteenYearsAgo;
-    }, 'You must be at least 18 years old'),
+    dob: z
+      .date({ error: 'Please select your date of birth' })
+      .refine((date) => {
+        const today = new Date();
+        const eighteenYearsAgo = new Date(
+          today.getFullYear() - 18,
+          today.getMonth(),
+          today.getDate()
+        );
+        return date <= eighteenYearsAgo;
+      }, 'You must be at least 18 years old'),
     password: z.string().min(8, 'Password has to have minimum 8 characters'),
     confirmPassword: z.string()
   })
@@ -85,7 +87,6 @@ const formSchema = z
 
 export default function SignUpPage() {
   const [open, setOpen] = React.useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(undefined);
 
   const form = useForm<
     z.input<typeof formSchema>,
@@ -245,8 +246,8 @@ export default function SignUpPage() {
                                 variant="outline"
                                 id="date"
                                 className="px-0 border-transparent border-b-input justify-between font-normal normal-case tracking-normal text-sm">
-                                {date ? (
-                                  date.toLocaleDateString()
+                                {field.value ? (
+                                  field.value.toLocaleDateString()
                                 ) : (
                                   <span
                                     data-placeholder
@@ -269,8 +270,8 @@ export default function SignUpPage() {
                               fixedWeeks
                               weekStartsOn={1}
                               disabled={{ after: new Date() }}
-                              onSelect={(date) => {
-                                setDate(date);
+                              onSelect={(selected) => {
+                                field.onChange(selected);
                                 setOpen(false);
                               }}
                             />
