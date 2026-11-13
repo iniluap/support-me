@@ -168,9 +168,10 @@ export default function SignUpPage() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="account-type">Account type</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Account type</FieldLabel>
                     <Select
                       {...register('field')}
+                      id={field.name}
                       value={field.value}
                       onValueChange={field.onChange}>
                       <SelectTrigger>
@@ -242,7 +243,9 @@ export default function SignUpPage() {
                     name="dob"
                     control={form.control}
                     render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
+                      <Field
+                        data-invalid={fieldState.invalid}
+                        id={field.name}>
                         <FieldLabel htmlFor={field.name}>
                           Date of birth
                         </FieldLabel>
