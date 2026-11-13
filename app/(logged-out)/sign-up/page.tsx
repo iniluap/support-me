@@ -18,7 +18,9 @@ import {
   Field,
   FieldGroup,
   FieldLabel,
-  FieldError
+  FieldError,
+  FieldDescription,
+  FieldContent
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -35,6 +37,8 @@ import {
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import React from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 const formSchema = z
   .object({
@@ -54,7 +58,12 @@ const formSchema = z
         return date <= eighteenYearsAgo;
       }, 'You must be at least 18 years old'),
     password: z.string().min(8, 'Password has to have minimum 8 characters'),
-    confirmPassword: z.string()
+    confirmPassword: z.string(),
+    acceptTerms: z
+      .boolean({
+        error: 'You must accept the terms and conditions'
+      })
+      .refine((checked) => checked, 'You must accept the terms and conditions')
   })
   .superRefine((data, ctx) => {
     if (data.accountType === 'company' && !data.companyName) {
@@ -328,6 +337,35 @@ export default function SignUpPage() {
                 )}
               />
               {/* Terms & conditions field */}
+              <Controller
+                name="acceptTerms"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field
+                    orientation="horizontal"
+                    data-invalid={fieldState.invalid}>
+                    <Checkbox
+                      {...register('field')}
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      id="accept-terms"
+                    />
+                    <FieldContent>
+                      <Label htmlFor="accept-terms">
+                        Accept terms and conditions
+                      </Label>
+                      <FieldDescription>
+                        By clicking this checkbox, you agree to the terms and
+                        conditions.
+                      </FieldDescription>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </FieldContent>
+                  </Field>
+                )}
+              />
+              {/* Submit */}
               <Field orientation="horizontal">
                 <Button type="submit">Sign up</Button>
                 <Button
