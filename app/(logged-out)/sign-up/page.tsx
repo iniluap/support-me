@@ -149,13 +149,14 @@ export default function SignUpPage() {
                     <FieldLabel htmlFor="account-type">Account type</FieldLabel>
                     <Select
                       {...register('field')}
+                      value={field.value}
                       onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select an account type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="personal">Personal</SelectItem>
-                        <SelectItem value="company">Company</SelectItem>
+                        <SelectItem value="personal">personal</SelectItem>
+                        <SelectItem value="company">company</SelectItem>
                       </SelectContent>
                     </Select>
                   </Field>
